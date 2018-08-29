@@ -16,12 +16,16 @@
   因为实际的服务器并不存在桌面，所以我们安装Minimal版本的CentOS即可，但是在CentOS的黑窗口中操作并不方便，所以下载SecureCRT操纵服务器。
 ```
 
+<br/>
+
 ### 安装CentOS
+
 本例中用VMware安装的CentOS系统，在安装时需要注意一个问题：
+
 ![](fastdfs/1.png)
 如上图所示，在安装CentOS时不要创建新用户，设置个ROOT密码即可，这样登录进去系统后默认就是ROOT权限，避免了权限不够的问题。（登录用户名密码默认都是`root`）
 
-*****1、登录系统并配置连接网络**
+**1、登录系统并配置连接网络**
 
 输入命令：`cd /etc/sysconfig/network-scripts/ && ls`，编辑列表中的第一个文件（因为文件名称可能不相同）
 ![](fastdfs/2.png)
@@ -49,6 +53,8 @@ systemctl disable firewalld.service #禁止firewall开机启动
 firewall-cmd --state #查看默认防火墙状态（关闭后显示notrunning，开启后显示running）
 ```
 
+<br/>
+
 ## 环境准备
 
 ### 安装所需命令
@@ -64,6 +70,8 @@ firewall-cmd --state #查看默认防火墙状态（关闭后显示notrunning，
 [root@localhost ~]# yum install git
 ```
 
+<br/>
+
 ### clone所需的安装文件
 我将所需的安装文件都上传到了我的 [GitHub](https://github.com/TyCoding/build-fastdfs) 上，大家只需要clone下载即可，这些版本我测试过是可用的。
 
@@ -74,6 +82,8 @@ GitHub地址： https://github.com/TyCoding/build-fastdfs
 [root@localhost ~]# mv build-fastdfs/* /root/ && rm -rf build-fastdfs
 [root@localhost ~]# cd software
 ```
+
+<br/>
 
 ## 开始
 
@@ -94,7 +104,10 @@ GitHub地址： https://github.com/TyCoding/build-fastdfs
 [root@localhost libfastcommon-master]# ln -s /usr/lib64/libfdfsclient.so /usr/lib/libfdfsclient.so 
 ```
 
+<br/>
+
 ### 安装FastDFS
+
 将`FastDFS_v5.05.tar.gz`解压到`/usr/local/fast`目录下
 
 ```
@@ -118,6 +131,7 @@ GitHub地址： https://github.com/TyCoding/build-fastdfs
 ```
 
 ![](fastdfs/5.png)
+
 一定要**注意**的是，这里并不是在文件中增加这一行代码，如上图，我们是给vim输入了一串指令，这个指令的作用是批量修改一些代码，当回车后会显示：`7 substitutions on 7 lines`，然后我们输入`:wq!`保存并退出文件的编辑
 
 同样的方式，修改`/etc/init.d/fdfs_trackerd`，输入命令
@@ -128,6 +142,8 @@ GitHub地址： https://github.com/TyCoding/build-fastdfs
 
 :wq!
 ```
+
+<br/>
 
 ### 配置tracker
 进入`/etc/fdfs`目录并复制一份`tracker.conf.sample`并命名为`tracker.conf`，并修改`tracker.conf`，将其中的`base_path`参数的值修改为`/fastdfs/tracker`，并使用`makir -p /fastdfs/tracker`创建两个目录
@@ -152,7 +168,10 @@ GitHub地址： https://github.com/TyCoding/build-fastdfs
 [root@localhost fdfs]# /etc/init.d/fdfs_trackerd start   
 ```
 
+<br/>
+
 ### 配置storage
+
 进入`/etc/fdfs`目录，赋值一份`storage.conf.sample`并命名为`storage.conf`，并修改`storage.conf`
 
 ```
@@ -192,7 +211,10 @@ ps -ef | grep fdfs
 
 如上我们就完成了FastDFS的配置。
 
+<br/>
+
 ### 测试文件上传
+
 进入`/etc/fdfs`目录并复制一份`client.conf.sample`并命名为`client.conf`
 
 ```
@@ -219,7 +241,9 @@ Hello TyCoding!
 ![](fastdfs/9.png)
 
 <br/>
+
 ### FastDFS与Nginx结合
+
 解压`nginx-1.6.2.tar.gz`到`/usr/local`目录下；解压`fastdfs-nginx-module_v1.16.tar.gz`到`/usr/local`目录下，编译和安装
 
 ```
@@ -231,7 +255,10 @@ Hello TyCoding!
 进入`/usr/local/fast/fastdfs-nginx-module/src/`目录下，修改其中的`config`文件，把其中第四行的`usr/local/include`都改为`/usr/include`
 ![](fastdfs/10.png)
 
+<br/>
+
 #### 编译nginx
+
 ```
 [root@localhost src]# cd /usr/local/ && ll
 [root@localhost local]# cd nginx-1.6.2 && ./configure --prefix=/usr/local/nginx --add-module=../fast/fastdfs-nginx-module/src/
@@ -248,6 +275,7 @@ Hello TyCoding!
 [root@localhost src]# cd /etc/fdfs && ll
 [root@localhost fdfs]# vi mod_fastdfs.conf
 ```
+
 修改如下部分
 ```
 connect_timeout=10
@@ -268,12 +296,14 @@ store_path0=/fastdfs/storage
 [root@localhost conf]# cd /usr/local/nginx/conf && ll
 [root@localhost conf]# vi nginx.conf
 ```
+
 修改如下部分
 ```
  location ~/group([0-9])/M00 {
    ngx_fastdfs_module;
  }
 ```
+
 ![](fastdfs/12.png)
 
 启动nginx
@@ -287,7 +317,10 @@ store_path0=/fastdfs/storage
 ![](fastdfs/14.png)
 出现上述信息证明各个配置都正常
 
+<br/>
+
 ### 通过http的方式访问上传文件
+
 ```
 [root@localhost conf]# /usr/bin/fdfs_upload_file /etc/fdfs/client.conf ~/test.txt
 ```
@@ -296,7 +329,9 @@ store_path0=/fastdfs/storage
 ![](fastdfs/16.png)
 
 <br/>
+
 ### 设置服务开机自启动
+
 经过上面的环境配置，我们一共需要启动三个服务才能实现最终的效果，那么每次启动服务器都手动去启动这些服务未免显得太过于麻烦了，所以我们配置这些服务开机自启动即可：
 
 ```
@@ -311,9 +346,11 @@ store_path0=/fastdfs/storage
 
 ![](fastdfs/17.png)
 其次，我们还要给`rc.local`文件赋予权限才能实现开机自启动
+
 ```
 [root@localhost ~]# chmod +x /etc/rc.d/rc.local
 ```
+
 ![](fastdfs/18.png)
 
 输入命令`reboot`重启服务器，再输入`netstat -ntlp`查看当前启动的服务，可以看到`storage`, `tracker`, `nginx`三个服务都自启动了。
@@ -331,6 +368,7 @@ store_path0=/fastdfs/storage
   * 如果你在安装nginx时添加`fastdfs-nginx-module`模块时出现`error`，请重新编译nginx，重新配置相关的文件，一般就能解决了。
 
 最后祝愿大家都能成功的搭建FastDFS系统。
+
 
 
 
