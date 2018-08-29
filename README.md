@@ -23,20 +23,25 @@
 本例中用VMware安装的CentOS系统，在安装时需要注意一个问题：
 
 ![](fastdfs/1.png)
+
 如上图所示，在安装CentOS时不要创建新用户，设置个ROOT密码即可，这样登录进去系统后默认就是ROOT权限，避免了权限不够的问题。（登录用户名密码默认都是`root`）
 
 **1、登录系统并配置连接网络**
 
 输入命令：`cd /etc/sysconfig/network-scripts/ && ls`，编辑列表中的第一个文件（因为文件名称可能不相同）
+
 ![](fastdfs/2.png)
 
 将最后行的`no`改成`yes`即可
+
 ![](fastdfs/3.png)
 
 修改点击键盘的`i`键进入编辑模式，修改完成后按下ESC键，再输入`:wq!`保存退出即可；然后执行命令`service network restart`重启服务。
 
 此时已经完成了CentOS的联网，输入命令`ip addr`查看服务器的IP地址（如果联网成功，会出现192.168.xx.xx类似这样的IP地址）：
+
 ![](fastdfs/4.png)
+
 这个IP地址即使此服务器的外网IP，即我们要用SecureCRT连接的服务器的IP
 
 **2、使用SecureCRT连接服务器**
@@ -73,6 +78,7 @@ firewall-cmd --state #查看默认防火墙状态（关闭后显示notrunning，
 <br/>
 
 ### clone所需的安装文件
+
 我将所需的安装文件都上传到了我的 [GitHub](https://github.com/TyCoding/build-fastdfs) 上，大家只需要clone下载即可，这些版本我测试过是可用的。
 
 ```
@@ -88,6 +94,7 @@ GitHub地址： https://github.com/TyCoding/build-fastdfs
 ## 开始
 
 ### 安装libfastcommon
+
 将`libfastcommon-master.zip`解压到`/usr/local/fast`目录下，并编译安装
 ```
 [root@localhost software]# unzip libfastcommon-master.zip -d /usr/local/fast/
@@ -202,6 +209,7 @@ ps -ef | grep fdfs
 ```
 
 ![](fastdfs/7.png)
+
 出现如上的显示才证明tracker和storage都正常启动了。
 **注意** 这个地方要吐槽一下啦，要是你输入`ps -ef | grep fdfs`出现的不是这三行，而是两行或其他，就证明肯定有一个服务没有启动成功，一般就是你的配置有错误；
 那么你有下面两个选择来解决这一错误情况：
@@ -227,6 +235,7 @@ ps -ef | grep fdfs
 base_path=/fastdfs/tracker  
 tracker_server=192.168.148.131:22122  #这个IP地址是你服务器的IP地址，输入命令`ip addr`即可查看到。不要盲目复制
 ```
+
 ![](fastdfs/8.png)
 
 下面使用`fdfs_upload_file`脚本进行文件上传操作。先创建测试文件，输入命令`vi test.txt`，回车后点击`i`键进入编辑模式，输入`Hello TyCoding!`，点击`ESC`键，输入`:wq!`保存并退出，通过
@@ -238,6 +247,7 @@ Hello TyCoding!
 ```
 
 如果出现类似下面的返回地址证明上传成功
+
 ![](fastdfs/9.png)
 
 <br/>
@@ -253,6 +263,7 @@ Hello TyCoding!
 ```
 
 进入`/usr/local/fast/fastdfs-nginx-module/src/`目录下，修改其中的`config`文件，把其中第四行的`usr/local/include`都改为`/usr/include`
+
 ![](fastdfs/10.png)
 
 <br/>
@@ -265,6 +276,7 @@ Hello TyCoding!
 ```
 
 正常情况下，会显示如下信息证明编译成功，因为这里需要为nginx添加`fastdfs-nginx-module`模块，和平常安装的nginx是不同的，如果不显示如下页面就重新进行编译
+
 ![](fastdfs/11.png)
 
 安装，并copy `/usr/local/fast/fastdfs-nginx-module/src/mod_fastdfs.conf` 到`/etc/fdfs`
@@ -311,10 +323,13 @@ store_path0=/fastdfs/storage
 [root@localhost conf]# /usr/local/nginx/sbin/nginx
 ```
 ![](fastdfs/13.png)
+
 如果出现以上显示证明nginx启动成功，否者的话启动失败，要重新编译安装nginx，一般都是`fastdfs-nginx-module`模块注入到nginx失败。
 
 以上我们已经完成了全部的配置，测试各个端口的启动情况，输入`netstat -ntlp`，可以看到如下信息：
+
 ![](fastdfs/14.png)
+
 出现上述信息证明各个配置都正常
 
 <br/>
@@ -326,6 +341,7 @@ store_path0=/fastdfs/storage
 ```
 
 ![](fastdfs/15.png)
+
 ![](fastdfs/16.png)
 
 <br/>
@@ -345,6 +361,7 @@ store_path0=/fastdfs/storage
 ```
 
 ![](fastdfs/17.png)
+
 其次，我们还要给`rc.local`文件赋予权限才能实现开机自启动
 
 ```
@@ -354,6 +371,7 @@ store_path0=/fastdfs/storage
 ![](fastdfs/18.png)
 
 输入命令`reboot`重启服务器，再输入`netstat -ntlp`查看当前启动的服务，可以看到`storage`, `tracker`, `nginx`三个服务都自启动了。
+
 ![](fastdfs/19.png)
 
 
